@@ -8,7 +8,7 @@ Built in a 20-minute Sarvam AI hackathon.
 
 ## ⭐ What is new here (not in the hackathon idea sheet)
 
-The sheet lists 49 separate products. Sahayak is **one agent that decides which of them you need**, plus four things the sheet does not describe:
+The sheet lists 49 separate products. Sahayak is **one agent that decides which of them you need**, plus five things the sheet does not describe:
 
 | New | What it does | Why it matters |
 |---|---|---|
@@ -16,7 +16,8 @@ The sheet lists 49 separate products. Sahayak is **one agent that decides which 
 | **2. Scam Shield** | Every document or message gets a low / medium / high fraud badge with reasons (OTP requests, advance fees, urgent threats). | Fake KYC and "pay a fee to release your claim" messages are common in India. The tool checks the notice before it helps you act on it. |
 | **3. Evidence Trail** | Each fact in the draft is shown next to the exact words you said or the exact line in your photo it came from. | The user can verify the AI's draft instead of trusting it blindly. The AI never invents names or numbers. It uses `[placeholders]`. |
 | **4. Family Forward (cloned voice)** | The summary becomes a voice message in a relative's cloned voice (with consent) to send to someone who can't read. | It solves the last-mile problem. The person who needs the information is often not the person at the phone. |
-| **5. Voice follow-ups** | After the draft, ask "how many days until I get a reply?" by voice and hear the answer in your language. | It makes the output a conversation, not a one-shot document. |
+| **5. Persona Mode (fun)** | One click re-explains the result as **Dadi** (warm, proverb-filled), **Fauji Uncle** (crisp numbered steps) or **Chhota Bachcha** (explained to a 10-year-old), each in its own voice. | The same facts, delivered in the tone the listener trusts. Elders, kids and busy people all take information differently. |
+| **6. Voice follow-ups** | After the draft, ask "how many days until I get a reply?" by voice and hear the answer in your language. | It makes the output a conversation, not a one-shot document. |
 
 *Closest sheet items, for transparency: #10 Elder Companion (scam warnings), #19 Voice Time Capsule (voice cloning), #39 Sunniye Samjhiye (evidence linked to audio). Sahayak differs by joining them into one routed pipeline.*
 
@@ -49,7 +50,7 @@ Hundreds of millions of people in India are entitled to schemes, claims, refunds
 |---|---|
 | Saaras v3 | Speech to text, including Hinglish (code-mix mode) |
 | Sarvam Vision (Document Intelligence) | Reading photos of letters, bills and notices |
-| Sarvam-105B | Routing, fact extraction, drafting, scam check, follow-up answers |
+| Sarvam-105B | Routing, fact extraction, drafting, scam check, personas, follow-up answers |
 | Bulbul v3 | Spoken summaries and answers in 10+ Indian languages |
 | Instant Voice Cloning (beta) | Family Forward in a relative's voice |
 

@@ -35,12 +35,16 @@ Reply with ONLY a JSON object, no markdown, with these keys:
 
 
 def chat(system, user, max_tokens=6000):
-    r = requests.post(f"{BASE}/v1/chat/completions", headers=H, timeout=120, json={
-        "model": "sarvam-105b",
-        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-        "max_tokens": max_tokens, "temperature": 0.3})
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"] or ""
+    for attempt in range(3):
+        r = requests.post(f"{BASE}/v1/chat/completions", headers=H, timeout=120, json={
+            "model": "sarvam-105b",
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            "max_tokens": max_tokens * (attempt + 1), "temperature": 0.3})
+        r.raise_for_status()
+        content = r.json()["choices"][0]["message"]["content"]
+        if content and content.strip():
+            return content
+    raise RuntimeError("model returned empty answer")
 
 
 def extract_json(text):
@@ -134,6 +138,29 @@ def ask():
         return jsonify(error=str(e)), 500
     audio, err = tts(ans, lang, "priya")
     return jsonify(answer=ans, audio=audio, error=err)
+
+
+PERSONAS = {
+    "dadi": ("a loving grandmother (Dadi). Warm, reassuring, uses one short folksy proverb or 'beta' naturally, never scary", "roopa"),
+    "fauji": ("a retired army officer uncle. Crisp, disciplined, numbered action steps, calm confidence", "ratan"),
+    "bachcha": ("a kind teacher talking to a 10-year-old. Very simple words, one fun comparison from daily life", "kavya"),
+}
+
+
+@app.post("/api/persona")
+def persona():
+    d = request.json
+    lang = d.get("lang", "hi-IN")
+    desc, speaker = PERSONAS.get(d.get("persona"), PERSONAS["dadi"])
+    sys_p = (f"Explain the following official document situation as {desc}. "
+             f"Speak in {LANGS.get(lang,'Hindi')}, 4 short sentences max, covering what happened and what to do next. "
+             "Stay accurate; do not invent facts, names or numbers. Output only the spoken words.\n\n" + d.get("context", "")[:4000])
+    try:
+        text = chat(sys_p, "Please explain.", 3000).strip()
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+    audio, err = tts(text, lang, speaker)
+    return jsonify(text=text, audio=audio, error=err)
 
 
 @app.post("/api/voice/create")

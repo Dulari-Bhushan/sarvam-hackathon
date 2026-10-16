@@ -43,6 +43,9 @@ h3{margin:0 0 8px;font-size:15px;color:var(--mut);text-transform:uppercase;lette
     <label style="color:var(--mut);font-size:13px"><input type="checkbox" id="consent"> This person agreed to have their voice used</label>
     <span id="cvs" style="color:var(--mut);font-size:13px"></span></div>
     <p id="sum" style="margin:12px 0 0"></p>
+    <div class="row" style="margin-top:12px"><b>🎭 Explain it like…</b>
+      <button class="pers" data-p="dadi">👵 Dadi</button><button class="pers" data-p="fauji">🎖️ Fauji Uncle</button><button class="pers" data-p="bachcha">🧒 Chhota Bachcha</button></div>
+    <p id="ptxt" style="margin:8px 0 0;font-style:italic"></p><audio id="aud4" controls hidden></audio>
     <div id="scam" style="margin-top:12px;padding:10px 12px;border-radius:10px;border:1px solid var(--ln)"></div></div>
   <div class="card"><h3>Evidence trail — what we understood and where from</h3><div id="ev"></div></div>
   <div class="card"><h3 id="dt">Document</h3><pre id="draft"></pre></div>
@@ -122,6 +125,12 @@ $("qgo").onclick=async()=>{
   $("ans").textContent=d.answer||d.error;
   if(d.audio){$("aud3").hidden=false;$("aud3").src="data:audio/wav;base64,"+d.audio;$("aud3").play().catch(()=>{})}
 };
+document.querySelectorAll(".pers").forEach(b=>b.onclick=async()=>{
+  $("ptxt").textContent="Getting into character…";
+  const d=await post("/api/persona",{persona:b.dataset.p,lang:$("lang").value,context:summary+"\n"+$("draft").textContent});
+  $("ptxt").textContent=d.text||d.error;
+  if(d.audio){$("aud4").hidden=false;$("aud4").src="data:audio/wav;base64,"+d.audio;$("aud4").play().catch(()=>{})}
+});
 let voiceId=null;
 $("cv").onclick=async()=>{
   if(!$("consent").checked){$("cvs").textContent="Please confirm consent first.";return}
