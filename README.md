@@ -1,6 +1,6 @@
-# Sahayak (सहायक)
+# Dadi Desk (दादी डेस्क)
 
-**One voice agent for Indian citizens. Speak your problem in your language, or photograph the letter. Sahayak works out what you need, drafts the right official document, checks it isn't a scam, and explains it aloud, even in a family member's voice.**
+**One voice agent for Indian citizens. Speak your problem in your language, or photograph the letter. Dadi Desk works out what you need, drafts the right official document, checks it isn't a scam, and explains it aloud, even in a family member's voice.**
 
 Built in a 20-minute Sarvam AI hackathon.
 
@@ -8,7 +8,7 @@ Built in a 20-minute Sarvam AI hackathon.
 
 ## ⭐ What is new here (not in the hackathon idea sheet)
 
-The sheet lists 49 separate products. Sahayak is **one agent that decides which of them you need**, plus five things the sheet does not describe:
+The sheet lists 49 separate products. Dadi Desk is **one agent that decides which of them you need**, plus five things the sheet does not describe:
 
 | New | What it does | Why it matters |
 |---|---|---|
@@ -19,7 +19,7 @@ The sheet lists 49 separate products. Sahayak is **one agent that decides which 
 | **5. Persona Mode (fun)** | One click re-explains the result as **Dadi** (warm, proverb-filled), **Fauji Uncle** (crisp numbered steps) or **Chhota Bachcha** (explained to a 10-year-old), each in its own voice. | The same facts, delivered in the tone the listener trusts. Elders, kids and busy people all take information differently. |
 | **6. Voice follow-ups** | After the draft, ask "how many days until I get a reply?" by voice and hear the answer in your language. | It makes the output a conversation, not a one-shot document. |
 
-*Closest sheet items, for transparency: #10 Elder Companion (scam warnings), #19 Voice Time Capsule (voice cloning), #39 Sunniye Samjhiye (evidence linked to audio). Sahayak differs by joining them into one routed pipeline.*
+*Closest sheet items, for transparency: #10 Elder Companion (scam warnings), #19 Voice Time Capsule (voice cloning), #39 Sunniye Samjhiye (evidence linked to audio). Dadi Desk differs by joining them into one routed pipeline.*
 
 ---
 

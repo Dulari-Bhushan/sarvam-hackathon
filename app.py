@@ -19,7 +19,7 @@ LANGS = {"hi-IN": "Hindi", "en-IN": "English", "ta-IN": "Tamil", "te-IN": "Telug
          "bn-IN": "Bengali", "mr-IN": "Marathi", "gu-IN": "Gujarati", "kn-IN": "Kannada",
          "ml-IN": "Malayalam", "pa-IN": "Punjabi", "od-IN": "Odia"}
 
-ROUTER_PROMPT = """You are Sahayak, an assistant helping Indian citizens turn a spoken problem into the right official document.
+ROUTER_PROMPT = """You are Dadi Desk, an assistant helping Indian citizens turn a spoken problem into the right official document.
 Input is what the user said (may be Hinglish/code-mixed or any Indian language) and optionally text read from a photo of a document.
 Reply with ONLY a JSON object, no markdown, with these keys:
 - "intent": one of "grievance" | "rti" | "insurance_claim" | "scheme" | "explain_document"
@@ -129,8 +129,8 @@ def process():
 def ask():
     d = request.json
     lang = d.get("lang", "hi-IN")
-    hist = "".join(f"User: {h['q']}\nSahayak: {h['a']}\n" for h in d.get("history", [])[-6:])
-    sys_p = (f"You are Sahayak. The user got this document draft and summary:\n{d.get('context','')[:5000]}\n"
+    hist = "".join(f"User: {h['q']}\nDadi Desk: {h['a']}\n" for h in d.get("history", [])[-6:])
+    sys_p = (f"You are Dadi Desk. The user got this document draft and summary:\n{d.get('context','')[:5000]}\n"
              + (f"Conversation so far:\n{hist}\n" if hist else "")
              + f"Answer their follow-up question in simple spoken {LANGS.get(lang,'Hindi')}, in at most 3 short sentences. "
              + "If unsure, say what to verify with the official office. No legal guarantees.")
