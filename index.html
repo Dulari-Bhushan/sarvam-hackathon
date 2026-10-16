@@ -52,7 +52,7 @@ h3{margin:0 0 8px;font-size:15px;color:var(--mut);text-transform:uppercase;lette
   <div class="card"><h3>Ask a follow-up (type or hold to talk)</h3>
     <div class="row"><input id="q" style="flex:1;min-width:200px;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--ink)" placeholder="e.g. Kitne din mein jawab milega?">
     <button id="qrec">🎤</button><button id="qgo" class="p">Ask</button></div>
-    <p id="ans" style="margin:10px 0 0"></p><audio id="aud3" controls hidden></audio></div>
+    <div id="chat" style="margin-top:10px"></div><audio id="aud3" controls hidden></audio></div>
   <div class="card"><h3>Next steps</h3><ol id="steps"></ol>
     <p style="color:var(--mut);font-size:13px">Draft for guidance only, not legal advice.</p></div>
 </div>
@@ -94,7 +94,7 @@ $("go").onclick=async()=>{
   const d=await post("/api/process",{text:$("said").value,ocr:$("ocr").value,lang:$("lang").value});
   $("go").disabled=false;
   if(d.error){status(d.error);return}
-  status("");$("out").hidden=false;
+  status("");$("out").hidden=false;hist=[];$("chat").innerHTML="";
   $("intent").textContent=(d.intent||"").replace("_"," ");$("why").textContent=d.why||"";
   summary=d.summary_native||"";$("sum").textContent=summary;
   if(d.audio){$("aud").src="data:audio/wav;base64,"+d.audio;$("aud").play().catch(()=>{})}
@@ -118,11 +118,15 @@ $("qrec").onclick=async()=>{
     const j=await fetch("/api/transcribe",{method:"POST",body:fd}).then(r=>r.json());$("q").value=j.text||"";if(j.text)$("qgo").click()};
   qmr.start();$("qrec").textContent="⏹";
 };
+let hist=[];
 $("qgo").onclick=async()=>{
-  $("ans").textContent="Thinking…";
+  const q=$("q").value.trim();if(!q)return;$("q").value="";
+  const box=document.createElement("div");box.className="ev";box.innerHTML="<b></b><small></small>";
+  box.firstChild.textContent="🧑 "+q;box.lastChild.textContent="Thinking…";$("chat").append(box);
   const ctx=summary+"\n"+$("draft").textContent;
-  const d=await post("/api/ask",{question:$("q").value,context:ctx,lang:$("lang").value});
-  $("ans").textContent=d.answer||d.error;
+  const d=await post("/api/ask",{question:q,context:ctx,lang:$("lang").value,history:hist});
+  box.lastChild.textContent="🤖 "+(d.answer||d.error);
+  if(d.answer)hist.push({q,a:d.answer});
   if(d.audio){$("aud3").hidden=false;$("aud3").src="data:audio/wav;base64,"+d.audio;$("aud3").play().catch(()=>{})}
 };
 document.querySelectorAll(".pers").forEach(b=>b.onclick=async()=>{
