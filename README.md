@@ -82,7 +82,13 @@ python app.py
 
 Open http://localhost:5000.
 
-## Deploy (Render)
+## Deploy (Vercel, fastest)
+
+1. On https://vercel.com choose **Add New > Project** and import this GitHub repo (`vercel.json` is included, no framework preset needed).
+2. Under **Environment Variables** add `SARVAM_API_KEY`.
+3. Deploy and open the URL. HTTPS is automatic, so the microphone works.
+
+## Deploy (Render, alternative)
 
 1. Push this repo to GitHub, then on https://render.com choose **New > Blueprint** and pick the repo (`render.yaml` is included).
 2. Set the `SARVAM_API_KEY` environment variable.
