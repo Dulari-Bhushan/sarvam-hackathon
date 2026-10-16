@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sahayak</title>
+<style>
+:root{--bg:#fffaf3;--card:#fff;--ink:#1f2937;--mut:#6b7280;--acc:#e8590c;--ln:#eadfce}
+@media(prefers-color-scheme:dark){:root{--bg:#161412;--card:#201d1a;--ink:#f3ede4;--mut:#a39a8c;--ln:#383128}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 60px}
+h1{margin:0 0 4px;font-size:28px}h1 span{color:var(--acc)}p.s{margin:0 0 20px;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;border-radius:10px;border:1px solid var(--ln);padding:10px 14px;background:var(--card);color:var(--ink);cursor:pointer}
+button.p{background:var(--acc);color:#fff;border-color:var(--acc)}button.rec{background:#c92a2a;color:#fff;border-color:#c92a2a}
+textarea{width:100%;min-height:80px;font:inherit;border-radius:10px;border:1px solid var(--ln);padding:10px;background:var(--card);color:var(--ink)}
+pre{white-space:pre-wrap;font:14px/1.5 ui-monospace,monospace;margin:0}
+.tag{display:inline-block;background:var(--acc);color:#fff;border-radius:99px;padding:2px 12px;font-size:13px}
+.ev{border-left:3px solid var(--acc);padding:4px 10px;margin:8px 0}.ev small{color:var(--mut);display:block}
+h3{margin:0 0 8px;font-size:15px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+#st{color:var(--mut);margin-top:8px}
+</style></head><body><main>
+<h1>Sahayak <span>सहायक</span></h1>
+<p class="s">Speak your problem in any Indian language. Get the right official document, explained back to you aloud.</p>
+
+<div class="card">
+  <div class="row">
+    <select id="lang"></select>
+    <button id="rec" class="p">🎤 Hold to talk</button>
+    <button id="demo">Try a sample</button>
+  </div>
+  <p style="margin:12px 0 6px;color:var(--mut)">What you said (edit if needed), and optionally text from your document:</p>
+  <textarea id="said" placeholder="e.g. Mera insurance claim reject ho gaya, bola ki documents incomplete the, but maine sab diya tha"></textarea>
+  <div class="row" style="margin-top:8px"><label style="color:var(--mut)">📷 Photo of your letter / bill / notice:</label><input type="file" id="photo" accept="image/png,image/jpeg"></div>
+  <textarea id="ocr" style="min-height:50px;margin-top:8px" placeholder="Text read from your photo appears here (you can also paste text)"></textarea>
+  <div class="row" style="margin-top:10px"><button id="go" class="p">Create my document</button></div>
+  <div id="st"></div>
+</div>
+
+<div id="out" hidden>
+  <div class="card"><span class="tag" id="intent"></span> <span id="why" style="color:var(--mut)"></span>
+    <div class="row" style="margin-top:12px"><audio id="aud" controls></audio>
+    <button id="fam">👨‍👩‍👧 Family Forward (voice message)</button><audio id="aud2" controls hidden></audio></div>
+    <p id="sum" style="margin:12px 0 0"></p></div>
+  <div class="card"><h3>Evidence trail — what we understood and where from</h3><div id="ev"></div></div>
+  <div class="card"><h3 id="dt">Document</h3><pre id="draft"></pre></div>
+  <div class="card"><h3>Next steps</h3><ol id="steps"></ol>
+    <p style="color:var(--mut);font-size:13px">Draft for guidance only, not legal advice.</p></div>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const L={"hi-IN":"Hindi","en-IN":"English","ta-IN":"Tamil","te-IN":"Telugu","bn-IN":"Bengali","mr-IN":"Marathi","gu-IN":"Gujarati","kn-IN":"Kannada","ml-IN":"Malayalam","pa-IN":"Punjabi"};
+for(const k in L)$("lang").add(new Option(L[k],k));
+let summary="",mr,chunks=[];
+const status=t=>$("st").textContent=t;
+const post=(u,b)=>fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json());
+$("demo").onclick=()=>{$("said").value="Mera insurance claim reject ho gaya. Company ne bola documents incomplete the, lekin maine saare bill aur discharge paper jama kiye the. Do mahine ho gaye, koi jawab nahi.";};
+
+async function startRec(){
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});
+  mr=new MediaRecorder(s);chunks=[];mr.ondataavailable=e=>chunks.push(e.data);
+  mr.onstop=async()=>{
+    s.getTracks().forEach(t=>t.stop());status("Transcribing…");
+    const fd=new FormData();fd.append("audio",new Blob(chunks,{type:mr.mimeType}),"a.webm");
+    const j=await fetch("/api/transcribe",{method:"POST",body:fd}).then(r=>r.json());
+    if(j.error){status("Speech error: "+j.error);return}
+    $("said").value=j.text;if(j.lang&&L[j.lang])$("lang").value=j.lang;status("Transcribed.");
+  };
+  mr.start();$("rec").classList.add("rec");$("rec").textContent="⏺ Recording… release to stop";
+}
+function stopRec(){if(mr&&mr.state==="recording"){mr.stop();$("rec").classList.remove("rec");$("rec").textContent="🎤 Hold to talk"}}
+$("rec").onmousedown=startRec;$("rec").onmouseup=stopRec;$("rec").onmouseleave=stopRec;
+$("rec").ontouchstart=e=>{e.preventDefault();startRec()};$("rec").ontouchend=stopRec;
+
+$("photo").onchange=async()=>{
+  const f=$("photo").files[0];if(!f)return;status("Reading your document with Sarvam Vision…");
+  const fd=new FormData();fd.append("photo",f);
+  const j=await fetch("/api/ocr",{method:"POST",body:fd}).then(r=>r.json());
+  if(j.error){status("Photo error: "+j.error);return}
+  $("ocr").value=j.text;status("Document read.");
+};
+$("go").onclick=async()=>{
+  status("Understanding your problem and drafting… (~20s)");$("go").disabled=true;
+  const d=await post("/api/process",{text:$("said").value,ocr:$("ocr").value,lang:$("lang").value});
+  $("go").disabled=false;
+  if(d.error){status(d.error);return}
+  status("");$("out").hidden=false;
+  $("intent").textContent=(d.intent||"").replace("_"," ");$("why").textContent=d.why||"";
+  summary=d.summary_native||"";$("sum").textContent=summary;
+  if(d.audio){$("aud").src="data:audio/wav;base64,"+d.audio;$("aud").play().catch(()=>{})}
+  $("ev").innerHTML="";(d.facts||[]).forEach(f=>{const e=document.createElement("div");e.className="ev";
+    e.innerHTML="<b></b><small></small>";e.firstChild.textContent=f.fact;e.lastChild.textContent="“"+f.evidence+"”";$("ev").append(e)});
+  $("dt").textContent=d.document_title||"Document";$("draft").textContent=d.draft||"";
+  $("steps").innerHTML="";(d.next_steps||[]).forEach(s=>{const li=document.createElement("li");li.textContent=s;$("steps").append(li)});
+  $("out").scrollIntoView({behavior:"smooth"});
+};
+$("fam").onclick=async()=>{
+  $("fam").textContent="Making voice message…";
+  const d=await post("/api/speak",{text:summary,lang:$("lang").value,speaker:"arjun"});
+  $("fam").textContent="👨‍👩‍👧 Family Forward (voice message)";
+  if(d.audio){$("aud2").hidden=false;$("aud2").src="data:audio/wav;base64,"+d.audio;$("aud2").play()}else alert(d.error);
+};
+</script></body></html>
