@@ -114,11 +114,15 @@ def process():
     user = f"User said: {text}"
     if ocr:
         user += f"\n\nText from photo of their document:\n{ocr}"
-    try:
-        raw = chat(ROUTER_PROMPT.replace("{lang}", lname), user)
-        data = extract_json(raw)
-    except Exception as e:
-        return jsonify(error=f"LLM step failed: {e}"), 500
+    data, last = None, None
+    for _ in range(3):
+        try:
+            data = extract_json(chat(ROUTER_PROMPT.replace("{lang}", lname), user))
+            break
+        except Exception as e:
+            last = e
+    if data is None:
+        return jsonify(error=f"LLM step failed: {last}"), 500
     audio, err = tts(data.get("summary_native", ""), lang, d.get("speaker", "priya"))
     data["audio"] = audio
     data["tts_error"] = err
