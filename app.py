@@ -30,6 +30,7 @@ Reply with ONLY a JSON object, no markdown, with these keys:
 - "draft_native": a short version of the draft body (4-6 sentences) in {lang}
 - "summary_native": a 3-sentence plain spoken summary in {lang} for the user: what we understood, what we drafted, what to do next. Simple words, no jargon.
 - "next_steps": list of 3 short English steps
+- "scam_check": {"risk": "low" | "medium" | "high", "reasons": list of up to 3 short English reasons}. Judge whether the document/message looks fraudulent or a phishing/fee scam (asks for OTP, advance fees, urgent threats, unofficial contact details, mismatched names). Genuine-looking official notices are "low"; say what the user should verify.
 """
 
 
@@ -135,10 +136,31 @@ def ask():
     return jsonify(answer=ans, audio=audio, error=err)
 
 
+@app.post("/api/voice/create")
+def voice_create():
+    f = request.files["audio"]
+    r = requests.post(f"{BASE}/voices/create", headers=H, timeout=90,
+                      files={"file": (f.filename or "ref.wav", f.stream, f.mimetype or "audio/wav")},
+                      data={"name": "family-" + os.urandom(3).hex(), "language": request.form.get("lang", "hi-IN")})
+    if r.status_code >= 300:
+        return jsonify(error=r.text), 500
+    j = r.json()
+    vid = (j.get("data") or j).get("voice_id")
+    return jsonify(voice_id=vid)
+
+
 @app.post("/api/speak")
 def speak():
     d = request.json
-    audio, err = tts(d["text"], d.get("lang", "hi-IN"), d.get("speaker", "arjun"))
+    if d.get("voice_id"):
+        r = requests.post(f"{BASE}/voices/clone", headers=H, timeout=90,
+                          files={"text": (None, d["text"][:950]), "language_code": (None, d.get("lang", "hi-IN")),
+                                 "voice_id": (None, d["voice_id"])})
+        if r.status_code >= 300:
+            return jsonify(audio=None, error=r.text)
+        j = r.json()
+        return jsonify(audio=j.get("audio_b64") or j.get("audio"), error=None)
+    audio, err = tts(d["text"], d.get("lang", "hi-IN"), d.get("speaker", "rahul"))
     return jsonify(audio=audio, error=err)
 
 

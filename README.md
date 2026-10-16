@@ -50,14 +50,13 @@ Open http://localhost:5000. Use Chrome so the microphone works.
 
 ## Limitations
 
-- Family Forward uses a different Bulbul speaker. True voice cloning (Sarvam's beta feature) is not wired in yet.
+- Voice cloning is Sarvam's beta feature. It needs a clean 10-second clip and the speaker's consent. If it fails, Family Forward falls back to a standard Bulbul voice.
 - Photos must be PNG or JPEG.
 - Drafts are for guidance only and are not legal advice.
 - The API key lives only in `.env`, which is git-ignored.
 
 ## Ideas for next
 
-- Real voice cloning for Family Forward
 - Offline or missed-call entry for people without smartphones
 - Auto-filling government forms, not just drafting letters
 
@@ -72,6 +71,14 @@ Sample documents are in `demo_images/`. Upload one, then speak (or type) the mat
 | `3_electricity_bill_wrong.png` | "Mera bijli ka bill bahut zyada aaya hai, hum to kam use karte hain." |
 | `4_hospital_discharge_summary.png` | "Maa ko hospital se chhutti mili hai, ye papers samajh nahi aa rahe." |
 | `5_scheme_application_rejected.png` | "Mera pension scheme ka form reject ho gaya, ab kya karun?" |
+
+## Scam Shield
+
+Every document or message gets a risk badge (low, medium, high) with reasons. A fake KYC SMS asking for an OTP and a fee, for example, is flagged high.
+
+## Family voice cloning
+
+Record 10 seconds of a relative (with their consent), and Family Forward speaks the summary in their cloned voice.
 
 ## Follow-up questions
 

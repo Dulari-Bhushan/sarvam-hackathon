@@ -39,7 +39,11 @@ h3{margin:0 0 8px;font-size:15px;color:var(--mut);text-transform:uppercase;lette
   <div class="card"><span class="tag" id="intent"></span> <span id="why" style="color:var(--mut)"></span>
     <div class="row" style="margin-top:12px"><audio id="aud" controls></audio>
     <button id="fam">👨‍👩‍👧 Family Forward (voice message)</button><audio id="aud2" controls hidden></audio></div>
-    <p id="sum" style="margin:12px 0 0"></p></div>
+    <div class="row" style="margin-top:10px"><button id="cv">🎙️ Clone a family voice (record 10s)</button>
+    <label style="color:var(--mut);font-size:13px"><input type="checkbox" id="consent"> This person agreed to have their voice used</label>
+    <span id="cvs" style="color:var(--mut);font-size:13px"></span></div>
+    <p id="sum" style="margin:12px 0 0"></p>
+    <div id="scam" style="margin-top:12px;padding:10px 12px;border-radius:10px;border:1px solid var(--ln)"></div></div>
   <div class="card"><h3>Evidence trail — what we understood and where from</h3><div id="ev"></div></div>
   <div class="card"><h3 id="dt">Document</h3><pre id="draft"></pre></div>
   <div class="card"><h3>Ask a follow-up (type or hold to talk)</h3>
@@ -91,6 +95,10 @@ $("go").onclick=async()=>{
   $("intent").textContent=(d.intent||"").replace("_"," ");$("why").textContent=d.why||"";
   summary=d.summary_native||"";$("sum").textContent=summary;
   if(d.audio){$("aud").src="data:audio/wav;base64,"+d.audio;$("aud").play().catch(()=>{})}
+  const sc=d.scam_check||{risk:"low",reasons:[]},col={low:"#2b8a3e",medium:"#e67700",high:"#c92a2a"}[sc.risk]||"#2b8a3e";
+  $("scam").style.borderColor=col;
+  $("scam").innerHTML="<b style='color:"+col+"'>🛡️ Scam Shield: "+(sc.risk||"low").toUpperCase()+" risk</b><br><small></small>";
+  $("scam").querySelector("small").textContent=(sc.reasons||[]).join(" · ");
   $("ev").innerHTML="";(d.facts||[]).forEach(f=>{const e=document.createElement("div");e.className="ev";
     e.innerHTML="<b></b><small></small>";e.firstChild.textContent=f.fact;e.lastChild.textContent="“"+f.evidence+"”";$("ev").append(e)});
   $("dt").textContent=d.document_title||"Document";$("draft").textContent=d.draft||"";
@@ -114,9 +122,21 @@ $("qgo").onclick=async()=>{
   $("ans").textContent=d.answer||d.error;
   if(d.audio){$("aud3").hidden=false;$("aud3").src="data:audio/wav;base64,"+d.audio;$("aud3").play().catch(()=>{})}
 };
+let voiceId=null;
+$("cv").onclick=async()=>{
+  if(!$("consent").checked){$("cvs").textContent="Please confirm consent first.";return}
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});const ch=[];
+  const m=new MediaRecorder(s);m.ondataavailable=e=>ch.push(e.data);
+  m.onstop=async()=>{s.getTracks().forEach(t=>t.stop());$("cvs").textContent="Cloning voice…";
+    const fd=new FormData();fd.append("audio",new Blob(ch,{type:m.mimeType}),"ref.webm");fd.append("lang",$("lang").value);
+    const j=await fetch("/api/voice/create",{method:"POST",body:fd}).then(r=>r.json());
+    if(j.voice_id){voiceId=j.voice_id;$("cvs").textContent="✅ Family voice ready. Click Family Forward."}else $("cvs").textContent="Clone failed, using default voice.";
+  };
+  m.start();let n=10;const t=setInterval(()=>{$("cvs").textContent="⏺ Recording… speak naturally "+n--+"s";if(n<0){clearInterval(t);m.stop()}},1000);
+};
 $("fam").onclick=async()=>{
   $("fam").textContent="Making voice message…";
-  const d=await post("/api/speak",{text:summary,lang:$("lang").value,speaker:"arjun"});
+  const d=await post("/api/speak",{text:summary,lang:$("lang").value,speaker:"rahul",voice_id:voiceId});
   $("fam").textContent="👨‍👩‍👧 Family Forward (voice message)";
   if(d.audio){$("aud2").hidden=false;$("aud2").src="data:audio/wav;base64,"+d.audio;$("aud2").play()}else alert(d.error);
 };
