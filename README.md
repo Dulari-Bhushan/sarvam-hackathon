@@ -66,6 +66,8 @@ Sample documents are in `demo_images/`. Upload one, then speak (or type) the mat
 | `4_hospital_discharge_summary.png` | "Maa ko hospital se chhutti mili hai, ye papers samajh nahi aa rahe." |
 | `5_scheme_application_rejected.png` | "Mera pension scheme ka form reject ho gaya, ab kya karun?" |
 
+| `6_FAKE_claim_approved_scam.png` | "Mujhe ye message aaya hai, mera claim approve ho gaya, kya ye sach hai?" (Scam Shield: HIGH risk) |
+
 **Scam Shield demo (type this):** "Mujhe SMS aaya ki mera KYC expire ho gaya, abhi 500 rupay fees bhejo aur OTP batao warna account band." The result shows a **red HIGH risk** badge.
 
 ## Run it
