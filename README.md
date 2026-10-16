@@ -72,3 +72,13 @@ Sample documents are in `demo_images/`. Upload one, then speak (or type) the mat
 | `3_electricity_bill_wrong.png` | "Mera bijli ka bill bahut zyada aaya hai, hum to kam use karte hain." |
 | `4_hospital_discharge_summary.png` | "Maa ko hospital se chhutti mili hai, ye papers samajh nahi aa rahe." |
 | `5_scheme_application_rejected.png` | "Mera pension scheme ka form reject ho gaya, ab kya karun?" |
+
+## Follow-up questions
+
+After a document is drafted, ask a follow-up by voice or text ("how many days until I get a reply?"). The answer is spoken back in the same language.
+
+## Deploy (Render)
+
+1. Push this repo to GitHub, then on https://render.com choose **New > Blueprint** and pick the repo (`render.yaml` is included).
+2. Set the `SARVAM_API_KEY` environment variable.
+3. Open the generated URL. The microphone needs HTTPS, which Render provides.

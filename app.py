@@ -3,10 +3,12 @@ import requests
 from flask import Flask, jsonify, request, send_from_directory
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-for line in open(os.path.join(HERE, ".env"), encoding="utf-8"):
-    if "=" in line:
-        k, v = line.strip().split("=", 1)
-        os.environ.setdefault(k, v)
+_env = os.path.join(HERE, ".env")
+if os.path.exists(_env):
+    for line in open(_env, encoding="utf-8"):
+        if "=" in line:
+            k, v = line.strip().split("=", 1)
+            os.environ.setdefault(k, v)
 KEY = os.environ["SARVAM_API_KEY"]
 H = {"api-subscription-key": KEY}
 BASE = "https://api.sarvam.ai"
@@ -118,6 +120,21 @@ def process():
     return jsonify(data)
 
 
+@app.post("/api/ask")
+def ask():
+    d = request.json
+    lang = d.get("lang", "hi-IN")
+    sys_p = (f"You are Sahayak. The user got this document draft and summary:\n{d.get('context','')[:5000]}\n"
+             f"Answer their follow-up question in simple spoken {LANGS.get(lang,'Hindi')}, in at most 3 short sentences. "
+             "If unsure, say what to verify with the official office. No legal guarantees.")
+    try:
+        ans = chat(sys_p, d["question"], 3000).strip()
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+    audio, err = tts(ans, lang, "priya")
+    return jsonify(answer=ans, audio=audio, error=err)
+
+
 @app.post("/api/speak")
 def speak():
     d = request.json
@@ -126,4 +143,4 @@ def speak():
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=False)
+    app.run(port=int(os.environ.get("PORT", 5000)), debug=False)

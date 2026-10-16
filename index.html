@@ -42,6 +42,10 @@ h3{margin:0 0 8px;font-size:15px;color:var(--mut);text-transform:uppercase;lette
     <p id="sum" style="margin:12px 0 0"></p></div>
   <div class="card"><h3>Evidence trail — what we understood and where from</h3><div id="ev"></div></div>
   <div class="card"><h3 id="dt">Document</h3><pre id="draft"></pre></div>
+  <div class="card"><h3>Ask a follow-up (type or hold to talk)</h3>
+    <div class="row"><input id="q" style="flex:1;min-width:200px;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--ink)" placeholder="e.g. Kitne din mein jawab milega?">
+    <button id="qrec">🎤</button><button id="qgo" class="p">Ask</button></div>
+    <p id="ans" style="margin:10px 0 0"></p><audio id="aud3" controls hidden></audio></div>
   <div class="card"><h3>Next steps</h3><ol id="steps"></ol>
     <p style="color:var(--mut);font-size:13px">Draft for guidance only, not legal advice.</p></div>
 </div>
@@ -92,6 +96,23 @@ $("go").onclick=async()=>{
   $("dt").textContent=d.document_title||"Document";$("draft").textContent=d.draft||"";
   $("steps").innerHTML="";(d.next_steps||[]).forEach(s=>{const li=document.createElement("li");li.textContent=s;$("steps").append(li)});
   $("out").scrollIntoView({behavior:"smooth"});
+};
+let qmr;
+$("qrec").onclick=async()=>{
+  if(qmr&&qmr.state==="recording"){qmr.stop();return}
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});const ch=[];
+  qmr=new MediaRecorder(s);qmr.ondataavailable=e=>ch.push(e.data);
+  qmr.onstop=async()=>{s.getTracks().forEach(t=>t.stop());$("qrec").textContent="🎤";
+    const fd=new FormData();fd.append("audio",new Blob(ch,{type:qmr.mimeType}),"q.webm");
+    const j=await fetch("/api/transcribe",{method:"POST",body:fd}).then(r=>r.json());$("q").value=j.text||"";if(j.text)$("qgo").click()};
+  qmr.start();$("qrec").textContent="⏹";
+};
+$("qgo").onclick=async()=>{
+  $("ans").textContent="Thinking…";
+  const ctx=summary+"\n"+$("draft").textContent;
+  const d=await post("/api/ask",{question:$("q").value,context:ctx,lang:$("lang").value});
+  $("ans").textContent=d.answer||d.error;
+  if(d.audio){$("aud3").hidden=false;$("aud3").src="data:audio/wav;base64,"+d.audio;$("aud3").play().catch(()=>{})}
 };
 $("fam").onclick=async()=>{
   $("fam").textContent="Making voice message…";
