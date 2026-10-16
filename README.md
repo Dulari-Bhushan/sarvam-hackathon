@@ -60,3 +60,15 @@ Open http://localhost:5000. Use Chrome so the microphone works.
 - Real voice cloning for Family Forward
 - Offline or missed-call entry for people without smartphones
 - Auto-filling government forms, not just drafting letters
+
+## Demo scenarios
+
+Sample documents are in `demo_images/`. Upload one, then speak (or type) the matching line.
+
+| Image | Say |
+|---|---|
+| `1_insurance_claim_rejection.png` | "Mera claim reject ho gaya, maine to saare bill jama kiye the." |
+| `2_bank_loan_notice.png` | "Bank ne notice bheja hai, meri fasal kharab hui thi, ab penalty kyun?" |
+| `3_electricity_bill_wrong.png` | "Mera bijli ka bill bahut zyada aaya hai, hum to kam use karte hain." |
+| `4_hospital_discharge_summary.png` | "Maa ko hospital se chhutti mili hai, ye papers samajh nahi aa rahe." |
+| `5_scheme_application_rejected.png` | "Mera pension scheme ka form reject ho gaya, ab kya karun?" |
